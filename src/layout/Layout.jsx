@@ -107,7 +107,7 @@ export default function Layout() {
         }}
       >
         <Container
-          maxWidth="xl"
+          maxWidth="2xl"
           sx={{
             my: 2,
             mb: 16, // Add bottom margin to prevent content from being hidden behind footer

@@ -115,9 +115,9 @@ export default function DataTable({
           flexWrap: "wrap",
         }}
       >
-        <GridToolbarDensitySelector
+        {/* <GridToolbarDensitySelector
           slotProps={{ tooltip: { title: "Change density" } }}
-        />
+        /> */}
         <Button
           startIcon={<MdImportExport />}
           onClick={handleExportClick}

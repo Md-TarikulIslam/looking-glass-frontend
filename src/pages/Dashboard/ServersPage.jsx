@@ -1,5 +1,12 @@
 /* eslint-disable no-unused-vars */
-import { Autocomplete, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  Chip,
+  LinearProgress,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import {
@@ -10,6 +17,8 @@ import {
   MdRemoveRedEye,
   MdSave,
 } from "react-icons/md";
+import linux from "../../assets/images/icon/1.png";
+import windows from "../../assets/images/icon/2.png";
 import DeleteDialog from "../../components/Shared/DeleteDialog";
 import DialogWrapper from "../../components/Shared/DialogWrapper";
 import DashboardBreadcrumbs from "../../components/UI/DashboardBreadcrumbs";
@@ -29,6 +38,118 @@ const initialState = {
   groupId: "",
   platform: "",
 };
+// Add this sample data array
+const sampleData = [
+  {
+    id: 1,
+    name: "SSL-Zimbra-Mail-Server",
+    organization: "Silken Sewing Limited",
+    environment: "Production",
+    os: "windows",
+    cpu: 10,
+    ram: 86,
+    disk: 86,
+    load: 0.32,
+    net: {
+      down: "373.79",
+      up: "12.83",
+    },
+    uptime: "15d 8h 45m",
+    lastSync: "34 seconds ago",
+    status: "On",
+  },
+  {
+    id: 2,
+    name: "SSL-Database-MSSQL",
+    organization: "Silken Sewing Limited",
+    environment: "Production",
+    os: "linux",
+    cpu: 32,
+    ram: 20,
+    disk: 20,
+    load: 0.22,
+    net: {
+      down: "0.208",
+      up: "0.208",
+    },
+    uptime: "10d 12h 15m",
+    lastSync: "34 seconds ago",
+    status: "On",
+  },
+  {
+    id: 4,
+    name: "SSL-Secure-Tunnel",
+    organization: "Silken Sewing Limited",
+    environment: "Development",
+    os: "windows",
+    cpu: 0,
+    ram: 0,
+    disk: 0,
+    load: 0.05,
+    net: {
+      down: "0",
+      up: "0",
+    },
+    uptime: "5d 3h 20m",
+    lastSync: "34 seconds ago",
+    status: "Off",
+  },
+  {
+    id: 5,
+    name: "SSL-FastReact-Server",
+    organization: "Silken Sewing Limited",
+    environment: "Quality",
+    os: "windows",
+    cpu: 0,
+    ram: 63,
+    disk: 76,
+    load: 1.75,
+    net: {
+      down: "63.23",
+      up: "765.37",
+    },
+    uptime: "2h 45m",
+    lastSync: "12 days ago",
+    status: "On",
+  },
+  {
+    id: 6,
+    name: "SSL-X-Factor-HRMS-Server",
+    organization: "Silken Sewing Limited",
+    environment: "Production",
+    os: "windows",
+    cpu: 0,
+    ram: 9,
+    disk: 5,
+    load: 0.15,
+    net: {
+      down: "9.4",
+      up: "0.05361",
+    },
+    uptime: "8d 16h 10m",
+    lastSync: "33 seconds ago",
+    status: "Off",
+  },
+  {
+    id: 7,
+    name: "SSL-Website-&-HelloBook-CMS",
+    organization: "Silken Sewing Limited",
+    environment: "Production",
+    os: "windows",
+    cpu: 0,
+    ram: 14,
+    disk: 5,
+    load: 0.24,
+    net: {
+      down: "14.07",
+      up: "0.05263",
+    },
+    uptime: "3d 22h 55m",
+    lastSync: "49 seconds ago",
+    status: "On",
+  },
+];
+
 const ServersPage = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -104,111 +225,261 @@ const ServersPage = () => {
   };
   const columns = [
     {
+      field: "status",
+      headerName: "",
+      width: 70,
+      renderCell: (params) => (
+        <Box sx={{ width: "20%", mt: 3 }}>
+          <LinearProgress
+            variant="determinate"
+            value={params.value}
+            sx={{
+              height: 10,
+              borderRadius: 5,
+              backgroundColor: "#e0e0e0",
+              "& .MuiLinearProgress-bar": {
+                backgroundColor: params.value === "Off" ? "#f44336" : "#4caf50",
+                borderRadius: 5,
+              },
+            }}
+          />
+        </Box>
+      ),
+    },
+    {
       field: "id",
       headerName: "ID",
-      renderCell: (params) => {
-        return params.row.id;
-      },
+      width: 70,
     },
     {
       field: "name",
       headerName: "Name",
-      renderCell: (params) => {
-        return params.row.name;
-      },
+      width: 200,
     },
     {
-      field: "group",
-      headerName: "Group",
-      renderCell: (params) => {
-        return params.row.group.name;
-      },
+      field: "organization",
+      headerName: "Organization",
+      width: 250,
+    },
+    {
+      field: "environment",
+      headerName: "Environment",
+      width: 120,
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          size="small"
+          variant="outlined"
+          color={
+            params.value === "Production"
+              ? "primary"
+              : params.value === "Development"
+                ? "info"
+                : "warning"
+          }
+        />
+      ),
     },
     {
       field: "os",
       headerName: "OS",
-      renderCell: (params) => {
-        return params.row.os.name;
-      },
+      width: 100,
+      renderCell: (params) => (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+          }}
+        >
+          <img
+            src={params.value === "windows" ? windows : linux}
+            alt="OS"
+            style={{ width: 30 }}
+          />
+        </Box>
+      ),
     },
     {
       field: "cpu",
       headerName: "CPU",
-      renderCell: (params) => {
-        return params.row.os.name;
-      },
+      width: 100,
+      renderCell: (params) => (
+        <Box sx={{ width: "100%", mt: 2.5 }}>
+          <LinearProgress
+            variant="determinate"
+            value={params.value}
+            sx={{
+              height: 8,
+              borderRadius: 5,
+              backgroundColor: "#e0e0e0",
+              "& .MuiLinearProgress-bar": {
+                backgroundColor:
+                  params.value > 80
+                    ? "#f44336"
+                    : params.value > 60
+                      ? "#ff9800"
+                      : "#4caf50",
+                borderRadius: 5,
+              },
+            }}
+          />
+          <Box sx={{ minWidth: 35, textAlign: "right" }}>
+            <Typography variant="body2">{`${params.value}%`}</Typography>
+          </Box>
+        </Box>
+      ),
     },
     {
       field: "ram",
       headerName: "RAM",
-      renderCell: (params) => {
-        return params.row.os.name;
-      },
+      width: 100,
+      renderCell: (params) => (
+        <Box sx={{ width: "100%", mt: 2.5 }}>
+          <LinearProgress
+            variant="determinate"
+            value={params.value}
+            sx={{
+              height: 8,
+              borderRadius: 5,
+              backgroundColor: "#e0e0e0",
+              "& .MuiLinearProgress-bar": {
+                backgroundColor:
+                  params.value > 80
+                    ? "#f44336"
+                    : params.value > 60
+                      ? "#ff9800"
+                      : "#4caf50",
+                borderRadius: 5,
+              },
+            }}
+          />
+          <Box sx={{ minWidth: 35, textAlign: "right" }}>
+            <Typography variant="body2">{`${params.value}%`}</Typography>
+          </Box>
+        </Box>
+      ),
     },
     {
       field: "disk",
       headerName: "Disk",
-      renderCell: (params) => {
-        return params.row.os.name;
-      },
+      width: 100,
+      renderCell: (params) => (
+        <Box sx={{ width: "100%", mt: 2.5 }}>
+          <LinearProgress
+            variant="determinate"
+            value={params.value}
+            sx={{
+              height: 8,
+              borderRadius: 5,
+              backgroundColor: "#e0e0e0",
+              "& .MuiLinearProgress-bar": {
+                backgroundColor:
+                  params.value > 80
+                    ? "#f44336"
+                    : params.value > 60
+                      ? "#ff9800"
+                      : "#4caf50",
+                borderRadius: 5,
+              },
+            }}
+          />
+          <Box sx={{ minWidth: 35, textAlign: "right" }}>
+            <Typography variant="body2">{`${params.value}%`}</Typography>
+          </Box>
+        </Box>
+      ),
     },
     {
       field: "load",
       headerName: "Load",
-      renderCell: (params) => {
-        return params.row.os.name;
-      },
+      width: 100,
+      renderCell: (params) => (
+        <Box sx={{ width: "100%", mt: 2.5 }}>
+          <LinearProgress
+            variant="determinate"
+            value={params.value * 100}
+            sx={{
+              height: 8,
+              borderRadius: 5,
+              backgroundColor: "#e0e0e0",
+              "& .MuiLinearProgress-bar": {
+                backgroundColor:
+                  params.value > 0.8
+                    ? "#f44336"
+                    : params.value > 0.6
+                      ? "#ff9800"
+                      : "#4caf50",
+                borderRadius: 5,
+              },
+            }}
+          />
+          <Box sx={{ minWidth: 35, textAlign: "right" }}>
+            <Typography variant="body2">{params.value}</Typography>
+          </Box>
+        </Box>
+      ),
     },
     {
       field: "net",
       headerName: "Net",
-      renderCell: (params) => {
-        return params.row.os.name;
-      },
+      width: 150,
+      renderCell: (params) => (
+        <Box sx={{ mt: 1 }}>
+          <Typography variant="body2" color="textSecondary">
+            ↓ {params.value.down} KB/s
+          </Typography>
+          <Typography variant="body2" color="textSecondary">
+            ↑ {params.value.up} KB/s
+          </Typography>
+        </Box>
+      ),
     },
     {
       field: "uptime",
       headerName: "Uptime",
-      renderCell: (params) => {
-        return params.row.os.name;
-      },
+      width: 120,
     },
     {
-      field: "lastSeen",
-      headerName: "Last Seen",
-      renderCell: (params) => {
-        return params.row.os.name;
-      },
+      field: "lastSync",
+      headerName: "Last Sync",
+      width: 120,
     },
-
     {
       field: "actions",
-      type: "actions",
       headerName: "Actions",
-      cellClassName: "actions",
-      renderCell: (params) => {
-        const row = params.row;
-        return [
+      width: 150,
+      renderCell: (params) => (
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
+          }}
+        >
           <IconBtn
             icon={<MdRemoveRedEye />}
             name="View"
-            onClick={() => handleEditClick(row)}
-            color="warning"
-          />,
+            onClick={() => handleEditClick(params.row)}
+            color="primary"
+          />
           <IconBtn
             icon={<MdEdit />}
             name="Edit"
-            onClick={() => handleEditClick(row)}
+            onClick={() => handleEditClick(params.row)}
             color="warning"
-          />,
+          />
           <IconBtn
             icon={<MdDelete />}
             name="Delete"
-            onClick={() => handleDeleteClick(row)}
+            onClick={() => handleDeleteClick(params.row)}
             color="error"
-          />,
-        ];
-      },
+          />
+        </Box>
+      ),
     },
   ];
   const { data: serversData, isLoading: serverLoading } = useBrandsQuery();
@@ -257,8 +528,8 @@ const ServersPage = () => {
 
       <DataTable
         columns={columns}
-        initialRows={servers?.data || []}
-        rowsPerPage={100}
+        initialRows={sampleData} // Replace servers?.data with sampleData
+        rowsPerPage={10}
         loading={isLoading}
       />
     </div>

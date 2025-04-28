@@ -14,6 +14,8 @@ const SettingsPage = () => {
     { label: "Email", path: "email" },
     { label: "SMS Gateway", path: "sms" },
     { label: "Twitter", path: "twitter" },
+    { label: "WhatsApp", path: "whatsapp" },
+    { label: "Telegram", path: "telegram" },
     { label: "Pushover", path: "pushover" },
     { label: "Notifications", path: "notifications" },
     { label: "Cron Jobs", path: "cron" },

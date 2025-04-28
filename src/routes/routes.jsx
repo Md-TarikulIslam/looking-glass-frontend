@@ -5,6 +5,7 @@ import Layout from "../layout/Layout";
 import Loading from "../components/UI/Loading";
 import LoginPage from "../pages/Dashboard/LoginPage";
 import PrivateRoute from "./PrivateRoute";
+import { ServerOverviewPage } from '../pages/Dashboard/ServerDetails/ServerOverviewPage';
 
 // Lazy load components all
 const DashboardPage = lazy(() => import("../pages/Dashboard/DashboardPage"));
@@ -24,6 +25,8 @@ const ActivityLogPage = lazy(() => import("../pages/Dashboard/System/LogsMenu/Ac
 const EmailMessageLogPage = lazy(() => import("../pages/Dashboard/System/LogsMenu/EmailMessageLogPage"));
 const SMSMessageLogPage = lazy(() => import("../pages/Dashboard/System/LogsMenu/SMSMessageLogPage"));
 const CronLogPage = lazy(() => import("../pages/Dashboard/System/LogsMenu/CronLogPage"));
+const ServerDetailsPage = lazy(() => import("../pages/Dashboard/ServerDetails/ServerDetailsPage"));
+
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 
 const withSuspense = (Component) => (
@@ -128,12 +131,27 @@ export const router = createBrowserRouter([
               },
             ],
           },
+          {
+            path: "/dashboard/servers/server-details/:id",
+            element: withSuspense(ServerDetailsPage),
+            children: [
+              {
+                index: true,
+                element: <Navigate to="overview" replace />,
+              },
+              {
+                path: "overview",
+                element: <ServerOverviewPage />,
+              },
+            
+            ],
+          },
         ],
       },
     ],
   },
   {
     path: "/login",
-    element: <LoginPage />, // Login page not lazy loaded for faster initial access
+    element: <LoginPage />, 
   },
 ]);

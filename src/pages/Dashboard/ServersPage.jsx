@@ -33,6 +33,7 @@ import {
   useServersQuery,
   useUpdateServerMutation,
 } from "../../redux/features/serverApi";
+import { Link } from "react-router";
 const initialState = {
   name: "",
   groupId: "",
@@ -460,12 +461,11 @@ const ServersPage = () => {
             height: "100%",
           }}
         >
-          <IconBtn
+       <Link to={`/dashboard/servers/server-details/${params?.id}`}>   <IconBtn
             icon={<MdRemoveRedEye />}
             name="View"
-            onClick={() => handleEditClick(params.row)}
             color="primary"
-          />
+          /></Link>
           <IconBtn
             icon={<MdEdit />}
             name="Edit"

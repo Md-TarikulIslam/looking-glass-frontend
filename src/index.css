@@ -5,7 +5,9 @@ html,body{
   margin: 0;
   padding: 0;
 }
-
+@theme{
+  --color-blue: #2d92cb;
+}
 .dm {
   font-family: "DM Sans", sans-serif;
   font-optical-sizing: auto;

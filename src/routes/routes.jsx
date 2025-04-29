@@ -1,31 +1,60 @@
 /* eslint-disable no-unused-vars */
-import { Suspense, lazy } from 'react';
+import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router";
-import Layout from "../layout/Layout";
 import Loading from "../components/UI/Loading";
+import Layout from "../layout/Layout";
 import LoginPage from "../pages/Dashboard/LoginPage";
+import ServerCPUPage from "../pages/Dashboard/ServerDetails/ServerCPUPage";
+import ServerOverviewPage from "../pages/Dashboard/ServerDetails/ServerOverviewPage";
 import PrivateRoute from "./PrivateRoute";
-import { ServerOverviewPage } from '../pages/Dashboard/ServerDetails/ServerOverviewPage';
+import ServerRAMPage from "../pages/Dashboard/ServerDetails/ServerRAMPage";
+import ServerDisksPage from "../pages/Dashboard/ServerDetails/ServerDisksPage";
 
 // Lazy load components all
 const DashboardPage = lazy(() => import("../pages/Dashboard/DashboardPage"));
 const ServersPage = lazy(() => import("../pages/Dashboard/ServersPage"));
 const GroupsPage = lazy(() => import("../pages/Dashboard/GroupsPage"));
-const SettingsPage = lazy(() => import("../pages/Dashboard/System/Settings/SettingsPage"));
-const GeneralPage = lazy(() => import("../pages/Dashboard/System/Settings/GeneralPage"));
+const SettingsPage = lazy(
+  () => import("../pages/Dashboard/System/Settings/SettingsPage")
+);
+const GeneralPage = lazy(
+  () => import("../pages/Dashboard/System/Settings/GeneralPage")
+);
 const RolesPage = lazy(() => import("../pages/Dashboard/System/RolesPage"));
 const UsersPage = lazy(() => import("../pages/Dashboard/System/UsersPage"));
-const CreateRolePage = lazy(() => import("../pages/Dashboard/System/CreateRolePage"));
-const MonitoringPage = lazy(() => import("../pages/Dashboard/System/Settings/MonitoringPage"));
-const LocalizationPage = lazy(() => import("../pages/Dashboard/System/Settings/LocalizationPage"));
-const EmailPage = lazy(() => import("../pages/Dashboard/System/Settings/EmailPage"));
-const SMSGatewayPage = lazy(() => import("../pages/Dashboard/System/Settings/SMSGatewayPage"));
-const LogsPage = lazy(() => import("../pages/Dashboard/System/LogsMenu/LogsPage"));
-const ActivityLogPage = lazy(() => import("../pages/Dashboard/System/LogsMenu/ActivityLogPage"));
-const EmailMessageLogPage = lazy(() => import("../pages/Dashboard/System/LogsMenu/EmailMessageLogPage"));
-const SMSMessageLogPage = lazy(() => import("../pages/Dashboard/System/LogsMenu/SMSMessageLogPage"));
-const CronLogPage = lazy(() => import("../pages/Dashboard/System/LogsMenu/CronLogPage"));
-const ServerDetailsPage = lazy(() => import("../pages/Dashboard/ServerDetails/ServerDetailsPage"));
+const CreateRolePage = lazy(
+  () => import("../pages/Dashboard/System/CreateRolePage")
+);
+const MonitoringPage = lazy(
+  () => import("../pages/Dashboard/System/Settings/MonitoringPage")
+);
+const LocalizationPage = lazy(
+  () => import("../pages/Dashboard/System/Settings/LocalizationPage")
+);
+const EmailPage = lazy(
+  () => import("../pages/Dashboard/System/Settings/EmailPage")
+);
+const SMSGatewayPage = lazy(
+  () => import("../pages/Dashboard/System/Settings/SMSGatewayPage")
+);
+const LogsPage = lazy(
+  () => import("../pages/Dashboard/System/LogsMenu/LogsPage")
+);
+const ActivityLogPage = lazy(
+  () => import("../pages/Dashboard/System/LogsMenu/ActivityLogPage")
+);
+const EmailMessageLogPage = lazy(
+  () => import("../pages/Dashboard/System/LogsMenu/EmailMessageLogPage")
+);
+const SMSMessageLogPage = lazy(
+  () => import("../pages/Dashboard/System/LogsMenu/SMSMessageLogPage")
+);
+const CronLogPage = lazy(
+  () => import("../pages/Dashboard/System/LogsMenu/CronLogPage")
+);
+const ServerDetailsPage = lazy(
+  () => import("../pages/Dashboard/ServerDetails/ServerDetailsPage")
+);
 
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 
@@ -77,7 +106,9 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <Navigate to="/dashboard/system/settings/general" replace />,
+                element: (
+                  <Navigate to="/dashboard/system/settings/general" replace />
+                ),
               },
               {
                 path: "general",
@@ -111,7 +142,9 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <Navigate to="/dashboard/system/logs/activity-log" replace />,
+                element: (
+                  <Navigate to="/dashboard/system/logs/activity-log" replace />
+                ),
               },
               {
                 path: "activity-log",
@@ -143,7 +176,18 @@ export const router = createBrowserRouter([
                 path: "overview",
                 element: <ServerOverviewPage />,
               },
-            
+              {
+                path: "cpu",
+                element: <ServerCPUPage />,
+              },
+              {
+                path: "ram",
+                element: <ServerRAMPage />,
+              },
+              {
+                path: "disks",
+                element: <ServerDisksPage />,
+              },
             ],
           },
         ],
@@ -152,6 +196,6 @@ export const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <LoginPage />, 
+    element: <LoginPage />,
   },
 ]);

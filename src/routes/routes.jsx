@@ -9,6 +9,10 @@ import ServerOverviewPage from "../pages/Dashboard/ServerDetails/ServerOverviewP
 import PrivateRoute from "./PrivateRoute";
 import ServerRAMPage from "../pages/Dashboard/ServerDetails/ServerRAMPage";
 import ServerDisksPage from "../pages/Dashboard/ServerDetails/ServerDisksPage";
+import ServerNetworkPage from "../pages/Dashboard/ServerDetails/ServerNetworkPage";
+import ServerProcessesPage from "../pages/Dashboard/ServerDetails/ServerProcessesPage";
+import ServerIncidentsPage from "../pages/Dashboard/ServerDetails/ServerIncidentsPage";
+import ServerAlertingPage from "../pages/Dashboard/ServerDetails/ServerAlertingPage";
 
 // Lazy load components all
 const DashboardPage = lazy(() => import("../pages/Dashboard/DashboardPage"));
@@ -187,6 +191,22 @@ export const router = createBrowserRouter([
               {
                 path: "disks",
                 element: <ServerDisksPage />,
+              },
+              {
+                path: "network",
+                element: <ServerNetworkPage />,
+              },
+              {
+                path: "processes",
+                element: <ServerProcessesPage />,
+              },
+              {
+                path: "alerting",
+                element: <ServerAlertingPage />,
+              },
+              {
+                path: "incidents",
+                element: <ServerIncidentsPage />,
               },
             ],
           },

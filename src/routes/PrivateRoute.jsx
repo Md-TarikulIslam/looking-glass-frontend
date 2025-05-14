@@ -1,20 +1,14 @@
-/* eslint-disable no-unused-vars */
-import { Navigate, Outlet } from "react-router";
+import React from "react";
+import { useSelector } from "react-redux";
+import { Navigate } from "react-router";
+import { getCurrentToken } from "../redux/features/auth/authSlice";
 
-const PrivateRoute = () => {
-  const isAuthenticated = () => {
-    const authData = localStorage.getItem("looking-auth");
-    if (!authData) return false;
-
-    try {
-      const parsedData = JSON.parse(authData);
-      return parsedData.isAuthenticated === true;
-    } catch (error) {
-      return false;
-    }
-  };
-
-  return isAuthenticated() ? <Outlet /> : <Navigate to="/login" replace />;
+const PrivateRoute = ({ children }) => {
+  const token = useSelector(getCurrentToken);
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  return <div>{children}</div>;
 };
 
 export default PrivateRoute;

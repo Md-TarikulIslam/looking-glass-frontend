@@ -4,15 +4,17 @@ import { createBrowserRouter, Navigate } from "react-router";
 import Loading from "../components/UI/Loading";
 import Layout from "../layout/Layout";
 import LoginPage from "../pages/Dashboard/LoginPage";
-import ServerCPUPage from "../pages/Dashboard/ServerDetails/ServerCPUPage";
-import ServerOverviewPage from "../pages/Dashboard/ServerDetails/ServerOverviewPage";
-import PrivateRoute from "./PrivateRoute";
-import ServerRAMPage from "../pages/Dashboard/ServerDetails/ServerRAMPage";
-import ServerDisksPage from "../pages/Dashboard/ServerDetails/ServerDisksPage";
-import ServerNetworkPage from "../pages/Dashboard/ServerDetails/ServerNetworkPage";
-import ServerProcessesPage from "../pages/Dashboard/ServerDetails/ServerProcessesPage";
-import ServerIncidentsPage from "../pages/Dashboard/ServerDetails/ServerIncidentsPage";
 import ServerAlertingPage from "../pages/Dashboard/ServerDetails/ServerAlertingPage";
+import ServerCPUPage from "../pages/Dashboard/ServerDetails/ServerCPUPage";
+import ServerDisksPage from "../pages/Dashboard/ServerDetails/ServerDisksPage";
+import ServerIncidentsPage from "../pages/Dashboard/ServerDetails/ServerIncidentsPage";
+import ServerNetworkPage from "../pages/Dashboard/ServerDetails/ServerNetworkPage";
+import ServerOverviewPage from "../pages/Dashboard/ServerDetails/ServerOverviewPage";
+import ServerProcessesPage from "../pages/Dashboard/ServerDetails/ServerProcessesPage";
+import ServerRAMPage from "../pages/Dashboard/ServerDetails/ServerRAMPage";
+import CronJobsPage from "../pages/Dashboard/System/Settings/CronJobsPage";
+import PushoverPage from "../pages/Dashboard/System/Settings/PushoverPage";
+import TwitterPage from "../pages/Dashboard/System/Settings/TwitterPage";
 
 // Lazy load components all
 const DashboardPage = lazy(() => import("../pages/Dashboard/DashboardPage"));
@@ -71,144 +73,152 @@ const withSuspense = (Component) => (
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <PrivateRoute />,
+    element: <Layout />,
     children: [
       {
-        element: <Layout />,
+        path: "/",
+        element: withSuspense(DashboardPage),
+      },
+      {
+        path: "*",
+        element: withSuspense(ErrorPage),
+      },
+      {
+        path: "/dashboard/servers",
+        element: withSuspense(ServersPage),
+      },
+      {
+        path: "/dashboard/system/groups",
+        element: withSuspense(GroupsPage),
+      },
+      {
+        path: "/dashboard/system/roles",
+        element: withSuspense(RolesPage),
+      },
+      {
+        path: "/dashboard/system/roles/create-role",
+        element: withSuspense(CreateRolePage),
+      },
+      {
+        path: "/dashboard/system/users",
+        element: withSuspense(UsersPage),
+      },
+      {
+        path: "/dashboard/system/settings",
+        element: withSuspense(SettingsPage),
         children: [
           {
-            path: "/",
-            element: withSuspense(DashboardPage),
+            index: true,
+            element: (
+              <Navigate to="/dashboard/system/settings/general" replace />
+            ),
           },
           {
-            path: "*",
-            element: withSuspense(ErrorPage),
+            path: "general",
+            element: withSuspense(GeneralPage),
           },
           {
-            path: "/dashboard/servers",
-            element: withSuspense(ServersPage),
+            path: "monitoring",
+            element: withSuspense(MonitoringPage),
           },
           {
-            path: "/dashboard/system/groups",
-            element: withSuspense(GroupsPage),
+            path: "localization",
+            element: withSuspense(LocalizationPage),
           },
           {
-            path: "/dashboard/system/roles",
-            element: withSuspense(RolesPage),
+            path: "email",
+            element: withSuspense(EmailPage),
           },
           {
-            path: "/dashboard/system/roles/create-role",
-            element: withSuspense(CreateRolePage),
+            path: "email",
+            element: withSuspense(EmailPage),
           },
           {
-            path: "/dashboard/system/users",
-            element: withSuspense(UsersPage),
+            path: "sms",
+            element: withSuspense(SMSGatewayPage),
           },
           {
-            path: "/dashboard/system/settings",
-            element: withSuspense(SettingsPage),
-            children: [
-              {
-                index: true,
-                element: (
-                  <Navigate to="/dashboard/system/settings/general" replace />
-                ),
-              },
-              {
-                path: "general",
-                element: withSuspense(GeneralPage),
-              },
-              {
-                path: "monitoring",
-                element: withSuspense(MonitoringPage),
-              },
-              {
-                path: "localization",
-                element: withSuspense(LocalizationPage),
-              },
-              {
-                path: "email",
-                element: withSuspense(EmailPage),
-              },
-              {
-                path: "email",
-                element: withSuspense(EmailPage),
-              },
-              {
-                path: "sms",
-                element: withSuspense(SMSGatewayPage),
-              },
-            ],
+            path: "twitter",
+            element: <TwitterPage />,
           },
           {
-            path: "/dashboard/system/logs",
-            element: withSuspense(LogsPage),
-            children: [
-              {
-                index: true,
-                element: (
-                  <Navigate to="/dashboard/system/logs/activity-log" replace />
-                ),
-              },
-              {
-                path: "activity-log",
-                element: withSuspense(ActivityLogPage),
-              },
-              {
-                path: "email-message-log",
-                element: withSuspense(EmailMessageLogPage),
-              },
-              {
-                path: "sms-message-log",
-                element: withSuspense(SMSMessageLogPage),
-              },
-              {
-                path: "cron-log",
-                element: withSuspense(CronLogPage),
-              },
-            ],
+            path: "pushover",
+            element: <PushoverPage />,
           },
           {
-            path: "/dashboard/servers/server-details/:id",
-            element: withSuspense(ServerDetailsPage),
-            children: [
-              {
-                index: true,
-                element: <Navigate to="overview" replace />,
-              },
-              {
-                path: "overview",
-                element: <ServerOverviewPage />,
-              },
-              {
-                path: "cpu",
-                element: <ServerCPUPage />,
-              },
-              {
-                path: "ram",
-                element: <ServerRAMPage />,
-              },
-              {
-                path: "disks",
-                element: <ServerDisksPage />,
-              },
-              {
-                path: "network",
-                element: <ServerNetworkPage />,
-              },
-              {
-                path: "processes",
-                element: <ServerProcessesPage />,
-              },
-              {
-                path: "alerting",
-                element: <ServerAlertingPage />,
-              },
-              {
-                path: "incidents",
-                element: <ServerIncidentsPage />,
-              },
-            ],
+            path: "cron",
+            element: <CronJobsPage />,
+          },
+        ],
+      },
+      {
+        path: "/dashboard/system/logs",
+        element: withSuspense(LogsPage),
+        children: [
+          {
+            index: true,
+            element: (
+              <Navigate to="/dashboard/system/logs/activity-log" replace />
+            ),
+          },
+          {
+            path: "activity-log",
+            element: withSuspense(ActivityLogPage),
+          },
+          {
+            path: "email-message-log",
+            element: withSuspense(EmailMessageLogPage),
+          },
+          {
+            path: "sms-message-log",
+            element: withSuspense(SMSMessageLogPage),
+          },
+          {
+            path: "cron-log",
+            element: withSuspense(CronLogPage),
+          },
+        ],
+      },
+      {
+        path: "/dashboard/servers/server-details/:id",
+        element: withSuspense(ServerDetailsPage),
+        children: [
+          {
+            index: true,
+            element: <Navigate to="overview" replace />,
+          },
+          {
+            path: "overview",
+            element: <ServerOverviewPage />,
+          },
+          {
+            path: "cpu",
+            element: <ServerCPUPage />,
+          },
+          {
+            path: "ram",
+            element: <ServerRAMPage />,
+          },
+          {
+            path: "disks",
+            element: <ServerDisksPage />,
+          },
+          {
+            path: "network",
+            element: <ServerNetworkPage />,
+          },
+          {
+            path: "processes",
+            element: <ServerProcessesPage />,
+          },
+          {
+            path: "alerting",
+            element: <ServerAlertingPage />,
+          },
+
+          {
+            path: "incidents",
+            element: <ServerIncidentsPage />,
           },
         ],
       },

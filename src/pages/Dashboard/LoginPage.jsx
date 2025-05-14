@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { IconButton } from "@mui/material";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import Input from "../../components/UI/Input";
-import PrimaryButton, { TonalButton } from "../../components/UI/PrimaryButton";
+import PrimaryButton from "../../components/UI/PrimaryButton";
 import { title } from "../../layout/Layout";
+import {
+  getCurrentToken,
+  setCredentials,
+} from "../../redux/features/auth/authSlice";
+import { useLoginUserMutation } from "../../redux/features/user/loginApi";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -11,11 +19,14 @@ const LoginPage = () => {
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const [show, setShow] = useState(false);
   const navigate = useNavigate();
 
-  // Admin credentials from environment variables (fallback to "admin" if not set)
-  const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || "admin";
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "admin";
+  const dispatch = useDispatch();
+
+  const token = useSelector(getCurrentToken);
+
+  const [loginUser] = useLoginUserMutation();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,44 +36,37 @@ const LoginPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simple validation
-    if (!formData.email || !formData.password) {
-      toast.error("Please fill in all fields");
-      setLoading(false);
-      return;
-    }
+    try {
+      const response = await loginUser(formData).unwrap();
+      toast.success(response?.message);
+      const { user, token } = response.data;
 
-    // Check credentials
-    if (
-      formData.email === ADMIN_EMAIL &&
-      formData.password === ADMIN_PASSWORD
-    ) {
-      // Store auth data in localStorage
-      localStorage.setItem(
-        "looking-auth",
-        JSON.stringify({
-          isAuthenticated: true,
-          user: {
-            email: formData.email,
-            role: "admin",
-          },
-          token: "dummy-token-" + Date.now(), // In a real app, this would be a JWT from backend
+      // Set data in Redux store
+      dispatch(
+        setCredentials({
+          user,
+          token,
         })
       );
 
-      toast.success("Login successful!");
+      // Set refresh token in cookies
+      // setRefreshToken(token);
       navigate("/");
-    } else {
-      toast.error("Invalid credentials");
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong");
     }
 
     setLoading(false);
   };
-
+  useEffect(() => {
+    if (token) {
+      navigate("/");
+    }
+  }, [token, navigate]);
   const CustomTitle = () => (
     <div
       style={{
@@ -105,15 +109,27 @@ const LoginPage = () => {
             label="Enter Your Email"
           />
 
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="XXXXXXXXX"
-            label="Enter Your Password"
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={show ? "text" : "password"}
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="XXXXXXXXX"
+              label="Enter Your Password"
+              className="w-full"
+            />
+            <div className="absolute right-2  top-1/2 -translate-y-1/2">
+              <IconButton>
+                {show ? (
+                  <MdVisibility onClick={() => setShow(false)} />
+                ) : (
+                  <MdVisibilityOff onClick={() => setShow(true)} />
+                )}
+              </IconButton>
+            </div>
+          </div>
 
           <PrimaryButton
             type="submit"

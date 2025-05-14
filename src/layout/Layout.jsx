@@ -7,6 +7,7 @@ import { Footer } from "../components/Shared/Footer";
 import { ProfileMenu } from "../components/Shared/ProfileMenu";
 import { TopBar } from "../components/Shared/TopBar";
 import { theme } from "../context/ThemeContext";
+import PrivateRoute from "../routes/PrivateRoute";
 import { NAVIGATION } from "../static/menuLinks";
 
 function useRouter() {
@@ -85,38 +86,40 @@ export default function Layout() {
   }, [NAVIGATION, processNavigationItems]);
 
   return (
-    <AppProvider
-      navigation={dynamicNavigation}
-      router={router}
-      theme={theme}
-      branding={{
-        logo: "",
-        title: <CustomTitle />,
-        homeUrl: "/",
-      }}
-    >
-      <DashboardLayout
-        defaultMini={false}
-        onMiniChange={setSidebarMini}
-        slots={{
-          toolbarActions: TopBar,
-          toolbarAccount: () => null,
-          sidebarFooter: (props) => (
-            <ProfileMenu {...props} mini={sidebarMini} theme={theme} />
-          ),
+    <PrivateRoute>
+      <AppProvider
+        navigation={dynamicNavigation}
+        router={router}
+        theme={theme}
+        branding={{
+          logo: "",
+          title: <CustomTitle />,
+          homeUrl: "/",
         }}
       >
-        <Container
-          maxWidth="2xl"
-          sx={{
-            my: 2,
-            mb: 16, // Add bottom margin to prevent content from being hidden behind footer
+        <DashboardLayout
+          defaultMini={false}
+          onMiniChange={setSidebarMini}
+          slots={{
+            toolbarActions: TopBar,
+            toolbarAccount: () => null,
+            sidebarFooter: (props) => (
+              <ProfileMenu {...props} mini={sidebarMini} theme={theme} />
+            ),
           }}
         >
-          <Outlet />
-        </Container>
-        <Footer />
-      </DashboardLayout>
-    </AppProvider>
+          <Container
+            maxWidth="2xl"
+            sx={{
+              my: 2,
+              mb: 16, // Add bottom margin to prevent content from being hidden behind footer
+            }}
+          >
+            <Outlet />
+          </Container>
+          <Footer />
+        </DashboardLayout>
+      </AppProvider>
+    </PrivateRoute>
   );
 }

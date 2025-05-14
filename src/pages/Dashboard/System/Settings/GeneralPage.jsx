@@ -4,59 +4,50 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { MdSave } from "react-icons/md";
 import Input from "../../../../components/UI/Input";
+import { TonalButton } from "../../../../components/UI/PrimaryButton";
 import {
-  TonalButton,
-} from "../../../../components/UI/PrimaryButton";
-import {
-  useCreateFeatureMutation,
-  useDeleteFeatureMutation,
-  useFeaturesQuery,
-  useUpdateFeatureMutation,
-} from "../../../../redux/features/featureApi";
+  useConfigsQuery,
+  useUpdateConfigMutation,
+} from "../../../../redux/features/configApi";
 
-const initialState = {
-  name: "",
-};
 const GeneralPage = () => {
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [isUpdate, setIsUpdate] = useState(false);
-  const [feature, setFeature] = useState(initialState);
   const [loading, setLoading] = useState(false);
 
-  const { data: features, isLoading, refetch } = useFeaturesQuery();
+  const { data: configs, isLoading } = useConfigsQuery({
+    fields:
+      "appName,appUrl,companyName,logRetention,tableRecords,companyDetails",
+  });
 
-  const [createFeature] = useCreateFeatureMutation();
-  const [deleteFeature] = useDeleteFeatureMutation();
-  const [updateFeature] = useUpdateFeatureMutation();
+  const data = configs?.data;
+
+  const [updateConfig] = useUpdateConfigMutation();
+
+  const [settings, setSettings] = useState({});
 
   useEffect(() => {
-    if (isUpdate && selectedItem) {
-      setFeature({
-        name: selectedItem.name || "",
+    if (data) {
+      setSettings({
+        appName: data?.appName || "",
+        appUrl: data?.appUrl || "",
+        companyDetails: data?.companyDetails || "",
+        companyName: data?.companyName || "",
+        logRetention: data?.logRetention || "",
+        tableRecords: data?.tableRecords || 15,
       });
     } else {
-      setFeature(initialState);
+      setSettings("");
     }
-  }, [isUpdate, selectedItem]);
+  }, [data]);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (isUpdate) {
-        const response = await updateFeature({
-          id: selectedItem._id,
-          data: feature,
-        }).unwrap();
-        toast.success(response?.message || "Updated Successfully!");
-        setFeature(initialState);
-        refetch();
-      } else {
-        const response = await createFeature(feature).unwrap();
-        toast.success(response?.message || "Created Successfully!");
-        refetch();
-      }
+      const response = await updateConfig({
+        id: data?.id,
+        data: settings,
+      }).unwrap();
+      toast.success(response?.message || "Settings updated successfully!");
     } catch (error) {
       toast.error(error?.data?.message || "Something went wrong!");
     }
@@ -67,60 +58,64 @@ const GeneralPage = () => {
     <form className="space-y-6 w-full" onSubmit={handleFormSubmit}>
       <div className="grid md:grid-cols-2 gap-6">
         <Input
-          value={feature.name || ""}
+          value={settings.appName}
           onChange={(e) =>
-            setFeature({
-              ...feature,
-              name: e.target.value,
+            setSettings({
+              ...settings,
+              appName: e.target.value,
             })
           }
-          name="name"
+          name="appName"
           label="Application Name"
           helperText="Application Name as it appears throughout the system"
+          focused
         />
         <Input
-          value={feature.applicationUrl || ""}
+          value={settings.appUrl}
           onChange={(e) =>
-            setFeature({
-              ...feature,
-              applicationUrl: e.target.value,
+            setSettings({
+              ...settings,
+              appUrl: e.target.value,
             })
           }
-          name="applicationUrl"
+          name="appUrl"
           label="Application URL"
           helperText="Full installation URL including http:// or https:// (eg. http://mydomain.com/nmon/)"
+          focused
         />
         <Input
-          value={feature.companyName || ""}
+          value={settings.companyName}
           onChange={(e) =>
-            setFeature({
-              ...feature,
+            setSettings({
+              ...settings,
               companyName: e.target.value,
             })
           }
           name="companyName"
           label="Company Name"
           helperText="Company Name as it appears throughout the system"
+          focused
         />
 
         <Input
-          value={feature.systemLogRetention || ""}
+          value={settings.logRetention}
           onChange={(e) =>
-            setFeature({
-              ...feature,
-              systemLogRetention: Number(e.target.value),
+            setSettings({
+              ...settings,
+              logRetention: Number(e.target.value),
             })
           }
-          name="systemLogRetention"
+          name="logRetention"
           label="System Log Retention"
           helperText="Delete system log entries older then (days)"
+          focused
         />
         <Autocomplete
-          value={feature.recordDisplayPerPage?.toString() || ""}
+          value={settings.tableRecords || ""}
           onChange={(event, newValue) =>
-            setFeature({
-              ...feature,
-              recordDisplayPerPage: Number(newValue) || 10,
+            setSettings({
+              ...settings,
+              tableRecords: Number(newValue) || 10,
             })
           }
           options={["10", "25", "50", "100"]}
@@ -131,6 +126,7 @@ const GeneralPage = () => {
               label="Record to Display per Page"
               helperText="Record to Display per Page"
               required
+              focused
             />
           )}
           disableClearable
@@ -139,10 +135,10 @@ const GeneralPage = () => {
       </div>
       <div>
         <Input
-          value={feature.companyDetails || ""}
+          value={settings.companyDetails}
           onChange={(e) =>
-            setFeature({
-              ...feature,
+            setSettings({
+              ...settings,
               companyDetails: e.target.value,
             })
           }
@@ -152,12 +148,13 @@ const GeneralPage = () => {
           name="companyDetails"
           label="Company Details"
           helperText="Company Details used in the system for reports"
+          focused
         />
       </div>
       <TonalButton
         disabled={loading}
         startIcon={<MdSave />}
-        name={loading ? "Saving..." : isUpdate ? "Update" : "Save Changes"}
+        name={loading ? "Saving..." : "Save Changes"}
         type="submit"
         sx={{
           py: 1.4,

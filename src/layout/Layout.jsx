@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Container } from "@mui/material";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
@@ -9,6 +10,7 @@ import { TopBar } from "../components/Shared/TopBar";
 import { theme } from "../context/ThemeContext";
 import PrivateRoute from "../routes/PrivateRoute";
 import { NAVIGATION } from "../static/menuLinks";
+import { useConfigsQuery } from "../redux/features/configApi";
 
 function useRouter() {
   const navigate = useNavigate();
@@ -27,17 +29,26 @@ function useRouter() {
   );
 }
 
-export const title = `<b>Sierra</b> <i>Looking</i> Glass`;
-export const CustomTitle = () => (
-  <div
-    style={{
-      fontSize: "1.3rem",
-      fontWeight: "normal",
-      display: "inline-block",
-    }}
-    dangerouslySetInnerHTML={{ __html: title }}
-  />
-);
+export const CustomTitle = () => {
+  const { data: configs, isLoading: nameLoading } = useConfigsQuery({
+    fields: "appName",
+  });
+
+  const title = configs?.data?.appName;
+  if (nameLoading) {
+    return <div>Loading...</div>;
+  }
+  return (
+    <div
+      style={{
+        fontSize: "1.3rem",
+        fontWeight: "normal",
+        display: "inline-block",
+      }}
+      dangerouslySetInnerHTML={{ __html: title }}
+    />
+  );
+};
 
 export default function Layout() {
   const router = useRouter();

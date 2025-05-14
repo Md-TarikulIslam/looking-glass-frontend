@@ -9,7 +9,7 @@ const baseQuery = fetchBaseQuery({
     // Get token from Redux state
     const token = getState()?.auth?.token;
 
-    // headers.set("ngrok-skip-browser-warning", "true");
+    headers.set("ngrok-skip-browser-warning", "true");
     // headers.set("Access-Control-Allow-Origin", "*");
 
     if (token) {

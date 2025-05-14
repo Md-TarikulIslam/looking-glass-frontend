@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import Input from "../../components/UI/Input";
 import PrimaryButton from "../../components/UI/PrimaryButton";
-import { title } from "../../layout/Layout";
+import { CustomTitle } from "../../layout/Layout";
 import {
   getCurrentToken,
   setCredentials,
@@ -67,17 +67,17 @@ const LoginPage = () => {
       navigate("/");
     }
   }, [token, navigate]);
-  const CustomTitle = () => (
-    <div
-      style={{
-        fontSize: "2rem",
-        fontWeight: "normal",
-        display: "inline-block",
-        color: "#2d92c9",
-      }}
-      dangerouslySetInnerHTML={{ __html: title }}
-    />
-  );
+  // const CustomTitle = () => (
+  //   <div
+  //     style={{
+  //       fontSize: "2rem",
+  //       fontWeight: "normal",
+  //       display: "inline-block",
+  //       color: "#2d92c9",
+  //     }}
+  //     dangerouslySetInnerHTML={{ __html: title }}
+  //   />
+  // );
 
   return (
     <div

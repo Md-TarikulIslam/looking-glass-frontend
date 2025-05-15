@@ -1,30 +1,50 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { MdSave } from "react-icons/md";
 import Input from "../../../../components/UI/Input";
 import { TonalButton } from "../../../../components/UI/PrimaryButton";
+import { useTwitterConfigsQuery, useUpdateTwitterConfigMutation } from "../../../../redux/features/twitterConfigApi";
+import Loading from "../../../../components/UI/Loading";
 
 const TwitterPage = () => {
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState({
-    consumerKey: "",
-    consumerSecret: "",
-    accessToken: "",
-    accessTokenSecret: "",
+  const { data: twitterConfigs, isLoading } = useTwitterConfigsQuery({
+    fields:
+      "consumerKey,consumerSecret,accessToken,accessTokenSecret",
   });
+  const [updateTwitterConfig] = useUpdateTwitterConfigMutation();
+  const data = twitterConfigs?.data;
+  const [settings, setSettings] = useState({});
+  useEffect(() => {
+    if (data) {
+     
+      setSettings({
+       
+        consumerKey: data.consumerKey || "",
+        consumerSecret: data.username || "",
+        accessToken: data.accessToken,
+        accessTokenSecret: data.accessTokenSecret,
+      });
+    }
+  }, [data]);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // API call will be added later
-      toast.success("Twitter settings updated successfully!");
+      const response = await updateTwitterConfig({
+        id: data?.id,
+        data: settings,
+      }).unwrap();
+      toast.success(response?.message || "Twitter config updated successfully!");
     } catch (error) {
       toast.error(error?.data?.message || "Something went wrong!");
     }
     setLoading(false);
   };
-
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <form className="space-y-6 w-full" onSubmit={handleFormSubmit}>
       <div className="grid md:grid-cols-2 gap-6">
@@ -38,7 +58,7 @@ const TwitterPage = () => {
           }
           name="consumerKey"
           label="Consumer Key (API Key)"
-          required
+          focused
         />
 
         <Input
@@ -52,7 +72,7 @@ const TwitterPage = () => {
           name="consumerSecret"
           label="Consumer Secret (API Secret)"
           type="password"
-          required
+          focused
         />
 
         <Input
@@ -65,7 +85,7 @@ const TwitterPage = () => {
           }
           name="accessToken"
           label="Access Token"
-          required
+          focused
         />
 
         <Input
@@ -79,7 +99,7 @@ const TwitterPage = () => {
           name="accessTokenSecret"
           label="Access Token Secret"
           type="password"
-          required
+          focused
         />
       </div>
 

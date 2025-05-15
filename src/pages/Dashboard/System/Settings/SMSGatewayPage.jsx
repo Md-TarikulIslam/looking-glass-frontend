@@ -3,12 +3,12 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { MdSave } from "react-icons/md";
 import Input from "../../../../components/UI/Input";
+import Loading from "../../../../components/UI/Loading";
 import { TonalButton } from "../../../../components/UI/PrimaryButton";
 import {
   useSmsConfigsQuery,
   useUpdateSmsConfigMutation,
 } from "../../../../redux/features/smsConfigApi";
-import Loading from "../../../../components/UI/Loading";
 
 const smsProviders = [
   "Twilio",
@@ -30,7 +30,7 @@ const SMSGatewayPage = () => {
   useEffect(() => {
     if (data) {
       setSettings({
-        provider: data.provider, // Use the provider value directly from API
+        provider: data.provider || "none",
         username: data.username || "",
         apiId: data.apiId,
         password: data.password,
@@ -57,13 +57,11 @@ const SMSGatewayPage = () => {
     return <Loading />;
   }
 
-  console.log(data);
-
   return (
     <form className="space-y-6 w-full" onSubmit={handleFormSubmit}>
       <div className="grid md:grid-cols-2 gap-6">
         <Autocomplete
-          value={settings.provider}
+          value={settings.provider || "none"}
           onChange={(event, newValue) =>
             setSettings({
               ...settings,
@@ -76,11 +74,12 @@ const SMSGatewayPage = () => {
               {...params}
               variant="filled"
               label="SMS Provider"
-              required
+              required={settings.smtpEnable}
               focused
             />
           )}
           disableClearable
+          isOptionEqualToValue={(option, value) => option === value}
         />
 
         <Input

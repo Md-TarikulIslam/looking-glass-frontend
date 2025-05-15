@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { MdAdd, MdDelete, MdEdit } from "react-icons/md";
 
@@ -10,21 +10,43 @@ import DataTable from "../../../components/UI/DataTable";
 import IconBtn from "../../../components/UI/IconBtn";
 import PrimaryButton from "../../../components/UI/PrimaryButton";
 import {
-    useDeleteRoleMutation,
-    useRolesQuery,
+  useDeleteRoleMutation,
+  useRolesQuery,
 } from "../../../redux/features/roleApi";
+import { useConfigsQuery } from "../../../redux/features/configApi";
 
 const RolesPage = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const { data: roles, isLoading, refetch } = useRolesQuery();
+  const { data: configs, isLoading: configLoading } = useConfigsQuery({
+    fields: "tableRecords",
+  });
 
+  const [limit, setLimit] = useState(0);
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    if (configs?.data?.tableRecords) {
+      setLimit(Number(configs.data.tableRecords));
+    }
+  }, [configs]);
+
+  const {
+    data: roles,
+    isLoading,
+    refetch,
+  } = useRolesQuery({
+    page: page + 1,
+    limit,
+    fields: "name,permissions",
+    search: "",
+  });
   const [deleteRole] = useDeleteRoleMutation();
 
   const handleDelete = async () => {
     try {
-      await deleteRole(selectedItem._id).unwrap();
+      await deleteRole(selectedItem.id).unwrap();
       toast.success("Deleted Successfully!");
       refetch();
       setDeleteOpen(false);
@@ -33,9 +55,7 @@ const RolesPage = () => {
     }
   };
 
-  const handleEditClick = (row) => {
-    setSelectedItem(row);
-  };
+  
 
   const handleDeleteClick = (row) => {
     setSelectedItem(row);
@@ -46,6 +66,7 @@ const RolesPage = () => {
     {
       field: "name",
       headerName: "Roll Name",
+      width: 300,
       renderCell: (params) => {
         return params.row.name;
       },
@@ -59,12 +80,9 @@ const RolesPage = () => {
       renderCell: (params) => {
         const row = params.row;
         return [
-          <IconBtn
-            icon={<MdEdit />}
-            name="Edit"
-            onClick={() => handleEditClick(row)}
-            color="warning"
-          />,
+          <Link to={`/dashboard/system/roles/update-role/${row?.id}`}>
+            <IconBtn icon={<MdEdit />} name="Edit" color="warning" />
+          </Link>,
           <IconBtn
             icon={<MdDelete />}
             name="Delete"
@@ -77,7 +95,7 @@ const RolesPage = () => {
   ];
   return (
     <div className="space-y-6">
-      <DashboardBreadcrumbs name="System" item='Roles' />
+      <DashboardBreadcrumbs name="System" item="Roles" />
       <div className="flex justify-end">
         <Link to="/dashboard/system/roles/create-role">
           <PrimaryButton startIcon={<MdAdd />} name="Add Role" />
@@ -96,8 +114,12 @@ const RolesPage = () => {
       <DataTable
         columns={columns}
         initialRows={roles?.data || []}
-        rowsPerPage={100}
         loading={isLoading}
+        rowsPerPage={limit}
+        rowCount={roles?.total || 25}
+        paginationMode="server"
+        onPageChange={setPage}
+        onPageSizeChange={setLimit}
       />
     </div>
   );

@@ -11,16 +11,17 @@ const groupApi = baseApi.injectEndpoints({
       invalidatesTags: ["group"],
     }),
     groups: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "/groups",
         method: "GET",
+        params,
       }),
       providesTags: ["group"],
     }),
     updateGroup: builder.mutation({
       query: ({ data, id }) => ({
         url: `/groups/${id}`,
-        method: "PATCH",
+        method: "PUT",
         body: data,
       }),
       invalidatesTags: ["group"],

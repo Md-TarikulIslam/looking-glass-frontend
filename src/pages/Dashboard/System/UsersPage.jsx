@@ -3,11 +3,11 @@ import { Autocomplete, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import {
-    MdAdd,
-    MdDelete,
-    MdDoNotDisturb,
-    MdEdit,
-    MdSave,
+  MdAdd,
+  MdDelete,
+  MdDoNotDisturb,
+  MdEdit,
+  MdSave,
 } from "react-icons/md";
 import DeleteDialog from "../../../components/Shared/DeleteDialog";
 import DialogWrapper from "../../../components/Shared/DialogWrapper";
@@ -16,20 +16,23 @@ import DataTable from "../../../components/UI/DataTable";
 import IconBtn from "../../../components/UI/IconBtn";
 import Input from "../../../components/UI/Input";
 import PrimaryButton, {
-    TonalButton,
+  TonalButton,
 } from "../../../components/UI/PrimaryButton";
-import { useBrandsQuery } from "../../../redux/features/brandApi";
+import { useConfigsQuery } from "../../../redux/features/configApi";
+import { useGroupsQuery } from "../../../redux/features/groupApi";
+import { useRolesQuery } from "../../../redux/features/roleApi";
 import {
-    useCreateUserMutation,
-    useDeleteUserMutation,
-    useUpdateUserMutation,
-    useUsersQuery,
+  useCreateUserMutation,
+  useDeleteUserMutation,
+  useUpdateUserMutation,
+  useUsersQuery,
 } from "../../../redux/features/userApi";
 
 const initialState = {
   name: "",
-  groupId: "",
-  platform: "",
+  email: "",
+  password: "",
+  roleId: "",
 };
 const UsersPage = () => {
   const [selectedItem, setSelectedItem] = useState(null);
@@ -38,8 +41,42 @@ const UsersPage = () => {
   const [user, setUser] = useState(initialState);
   const [loading, setLoading] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const { data: configs, isLoading: configLoading } = useConfigsQuery({
+    fields: "tableRecords,timeZone,dateFormat",
+  });
 
-  const { data: users, isLoading, refetch } = useUsersQuery();
+  const [limit, setLimit] = useState(0);
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    if (configs?.data?.tableRecords) {
+      setLimit(Number(configs.data.tableRecords));
+    }
+  }, [configs]);
+
+  const {
+    data: users,
+    isLoading,
+    refetch,
+  } = useUsersQuery({
+    page: page + 1, // Convert to 1-based for API
+    limit,
+    fields: "name,email,groupIds,roleId",
+    search: "",
+  });
+
+  const { data: roles, isLoading: rolesLoading } = useRolesQuery({
+    page: page + 1,
+    limit,
+    fields: "name",
+    search: "",
+  });
+  const { data: groups, isLoading: groupLoading } = useGroupsQuery({
+    page: page + 1,
+    limit,
+    fields: "name",
+    search: "",
+  });
 
   const [createUser] = useCreateUserMutation();
   const [deleteUser] = useDeleteUserMutation();
@@ -49,8 +86,10 @@ const UsersPage = () => {
     if (isUpdate && selectedItem) {
       setUser({
         name: selectedItem.name || "",
-        groupId: selectedItem.groupId || "",
-        platform: selectedItem.platform || "",
+        email: selectedItem.email || "",
+        password: selectedItem.password || "",
+        roleId: selectedItem.roleId || "",
+        groupIds: selectedItem.groupIds?.map((group) => group) || [],
       });
     } else {
       setUser(initialState);
@@ -63,16 +102,17 @@ const UsersPage = () => {
     try {
       if (isUpdate) {
         const response = await updateUser({
-          id: selectedItem._id,
+          id: selectedItem.id,
           data: user,
         }).unwrap();
         toast.success(response?.message || "Updated Successfully!");
         setUser(initialState);
-        refetch();
+        handleClose();
       } else {
         const response = await createUser(user).unwrap();
         toast.success(response?.message || "Created Successfully!");
-        refetch();
+        setUser(initialState);
+        handleClose();
       }
     } catch (error) {
       toast.error(error?.data?.message || "Something went wrong!");
@@ -81,7 +121,7 @@ const UsersPage = () => {
   };
   const handleDelete = async () => {
     try {
-      await deleteUser(selectedItem._id).unwrap();
+      await deleteUser(selectedItem.id).unwrap();
       toast.success("Deleted Successfully!");
       refetch();
       setDeleteOpen(false);
@@ -92,6 +132,7 @@ const UsersPage = () => {
 
   const handleEditClick = (row) => {
     setSelectedItem(row);
+    setCreateOpen(true);
     setIsUpdate(true);
   };
 
@@ -108,6 +149,7 @@ const UsersPage = () => {
     {
       field: "name",
       headerName: "Name",
+      width: 300,
       renderCell: (params) => {
         return params.row.name;
       },
@@ -115,6 +157,7 @@ const UsersPage = () => {
     {
       field: "email",
       headerName: "Email",
+      width: 300,
       renderCell: (params) => {
         return params.row.email;
       },
@@ -122,6 +165,7 @@ const UsersPage = () => {
     {
       field: "role",
       headerName: "Role",
+      width: 300,
       renderCell: (params) => {
         return params.row.role.name;
       },
@@ -151,7 +195,8 @@ const UsersPage = () => {
       },
     },
   ];
-  const { data: usersData, isLoading: userLoading } = useBrandsQuery();
+  if (configLoading || !limit) return <div>Loading..</div>;
+  // const { data: usersData, isLoading: userLoading } = useBrandsQuery();
   return (
     <div className="space-y-6">
       <DashboardBreadcrumbs name="Users" />
@@ -177,10 +222,12 @@ const UsersPage = () => {
               user={user}
               setUser={setUser}
               loading={loading}
-              userLoading={userLoading}
-              usersData={usersData}
               isUpdate={isUpdate}
               handleClose={handleClose}
+              roles={roles?.data || []}
+              groups={groups?.data || []}
+              rolesLoading={rolesLoading}
+              groupsLoading={groupLoading}
             />
           }
         />
@@ -198,8 +245,12 @@ const UsersPage = () => {
       <DataTable
         columns={columns}
         initialRows={users?.data || []}
-        rowsPerPage={100}
         loading={isLoading}
+        rowsPerPage={limit}
+        rowCount={users?.total || 25}
+        paginationMode="server"
+        onPageChange={setPage}
+        onPageSizeChange={setLimit}
       />
     </div>
   );
@@ -212,71 +263,74 @@ const CreateUser = ({
   user,
   setUser,
   loading,
-  userLoading,
-  usersData,
   isUpdate,
   handleClose,
+  roles,
+  rolesLoading,
+  groups,
+  groupsLoading,
 }) => {
+  const selectedRole = roles?.find((role) => role.id === user.roleId);
+  const selectedGroups =
+    groups?.filter((group) => user.groupIds?.includes(group.id)) || [];
   return (
     <form className="space-y-6" onSubmit={handleFormSubmit}>
       <div className="grid md:grid-cols-1 gap-6">
-        {!userLoading && (
+        {!rolesLoading && (
           <Autocomplete
             disablePortal
-            id="user-select"
-            options={usersData?.data || []}
+            id="role-select"
+            options={roles || []}
             getOptionLabel={(option) => option.name || ""}
-            value={
-              usersData?.data?.find((user) => user._id === user.user) || null
-            }
+            value={selectedRole || null}
             onChange={(event, newValue) => {
               setUser({
                 ...user,
-                user: newValue?._id || "",
+                roleId: newValue?.id || "",
               });
             }}
             renderInput={(params) => (
               <TextField
                 {...params}
-                variant='filled'
+                variant="filled"
                 label="Select Role"
                 margin="dense"
                 required
-                error={!user.user && loading}
-                helperText={!user.user && loading ? "Role is required" : ""}
+                error={!user.roleId && loading}
+                helperText={!user.roleId && loading ? "Role is required" : ""}
               />
             )}
             isOptionEqualToValue={(option, value) => option._id === value._id}
           />
         )}
-        {!userLoading && (
+        {!groupsLoading && (
           <Autocomplete
+            multiple
             disablePortal
-            id="user-select"
-            options={usersData?.data || []}
+            id="group-select"
+            options={groups || []}
             getOptionLabel={(option) => option.name || ""}
-            value={
-              usersData?.data?.find((user) => user._id === user.user) || null
-            }
-            onChange={(event, newValue) => {
+            value={selectedGroups}
+            onChange={(event, newValues) => {
               setUser({
                 ...user,
-                user: newValue?._id || "",
+                groupIds: newValues.map((group) => group.id),
               });
             }}
             renderInput={(params) => (
               <TextField
                 {...params}
-                variant='filled'
-                label="Select Allowed Groups"
-                required
-                error={!user.user && loading}
+                variant="filled"
+                label="Select Groups"
+                error={!user.groupIds?.length && loading}
                 helperText={
-                  !user.user && loading ? "Allowed Group is required" : ""
+                  !user.groupIds?.length && loading
+                    ? "At least one group is required"
+                    : ""
                 }
               />
             )}
-            isOptionEqualToValue={(option, value) => option._id === value._id}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
           />
         )}
         <Input
@@ -330,9 +384,7 @@ const CreateUser = ({
         <TonalButton
           disabled={loading}
           startIcon={<MdSave />}
-          name={
-            loading ? "Saving..." : isUpdate ? "Update User" : "Add User"
-          }
+          name={loading ? "Saving..." : isUpdate ? "Update User" : "Add User"}
           type="submit"
           sx={{
             py: 1.4,

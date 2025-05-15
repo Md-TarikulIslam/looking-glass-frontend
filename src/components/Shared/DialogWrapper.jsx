@@ -14,7 +14,7 @@ export default function DialogWrapper({ open, setOpen, content, size, title }) {
     <React.Fragment>
       <Dialog
       
-        TransitionComponent={Transition}
+        // TransitionComponent={Transition}
         fullWidth={true}
         maxWidth={size ? size : "sm"}
         open={open}

@@ -6,7 +6,7 @@ import {
   MdDelete,
   MdDoNotDisturb,
   MdEdit,
-  MdSave
+  MdSave,
 } from "react-icons/md";
 import DeleteDialog from "../../components/Shared/DeleteDialog";
 import DialogWrapper from "../../components/Shared/DialogWrapper";
@@ -14,9 +14,8 @@ import DashboardBreadcrumbs from "../../components/UI/DashboardBreadcrumbs";
 import DataTable from "../../components/UI/DataTable";
 import IconBtn from "../../components/UI/IconBtn";
 import Input from "../../components/UI/Input";
-import Loading from "../../components/UI/Loading";
 import PrimaryButton, { TonalButton } from "../../components/UI/PrimaryButton";
-import { useBrandsQuery } from "../../redux/features/brandApi";
+import { useConfigsQuery } from "../../redux/features/configApi";
 import {
   useCreateGroupMutation,
   useDeleteGroupMutation,
@@ -34,11 +33,39 @@ const GroupsPage = () => {
   const [loading, setLoading] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { data: groups, isLoading, refetch } = useGroupsQuery();
+  const { data: configs, isLoading: configLoading } = useConfigsQuery({
+    fields: "tableRecords",
+  });
+
+  const [limit, setLimit] = useState(0);
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    if (configs?.data?.tableRecords) {
+      setLimit(Number(configs.data.tableRecords));
+    }
+  }, [configs]);
+
+  const {
+    data: groups,
+    isLoading,
+    refetch,
+  } = useGroupsQuery({
+    page: page + 1,
+    limit,
+    fields: "name",
+    search: "",
+  });
 
   const [createGroup] = useCreateGroupMutation();
   const [deleteGroup] = useDeleteGroupMutation();
   const [updateGroup] = useUpdateGroupMutation();
+
+  const handleClose = () => {
+    setCreateOpen(false);
+    setIsUpdate(false);
+    setDeleteOpen(false);
+  };
 
   useEffect(() => {
     if (isUpdate && selectedItem) {
@@ -56,16 +83,16 @@ const GroupsPage = () => {
     try {
       if (isUpdate) {
         const response = await updateGroup({
-          id: selectedItem._id,
+          id: selectedItem.id,
           data: group,
         }).unwrap();
         toast.success(response?.message || "Updated Successfully!");
         setGroup(initialState);
-        refetch();
+        handleClose();
       } else {
         const response = await createGroup(group).unwrap();
         toast.success(response?.message || "Created Successfully!");
-        refetch();
+        handleClose();
       }
     } catch (error) {
       toast.error(error?.data?.message || "Something went wrong!");
@@ -74,7 +101,7 @@ const GroupsPage = () => {
   };
   const handleDelete = async () => {
     try {
-      await deleteGroup(selectedItem._id).unwrap();
+      await deleteGroup(selectedItem.id).unwrap();
       toast.success("Deleted Successfully!");
       refetch();
       setDeleteOpen(false);
@@ -85,6 +112,7 @@ const GroupsPage = () => {
 
   const handleEditClick = (row) => {
     setSelectedItem(row);
+    setCreateOpen(true)
     setIsUpdate(true);
   };
 
@@ -93,14 +121,11 @@ const GroupsPage = () => {
     setDeleteOpen(true);
   };
 
-  const handleClose = () => {
-    setCreateOpen(false);
-    setIsUpdate(false);
-  };
   const columns = [
     {
       field: "id",
       headerName: "ID",
+      width:300,
       renderCell: (params) => {
         return params.row.id;
       },
@@ -108,6 +133,7 @@ const GroupsPage = () => {
     {
       field: "name",
       headerName: "Name",
+      width:200,
       renderCell: (params) => {
         return params.row.name;
       },
@@ -117,6 +143,7 @@ const GroupsPage = () => {
       field: "actions",
       type: "actions",
       headerName: "Actions",
+      width:200,
       cellClassName: "actions",
       renderCell: (params) => {
         const row = params.row;
@@ -137,7 +164,8 @@ const GroupsPage = () => {
       },
     },
   ];
-  const { data: groupsData, isLoading: groupLoading } = useBrandsQuery();
+
+  if (configLoading || !limit) return <div>Loading..</div>;
   return (
     <div className="space-y-6">
       <DashboardBreadcrumbs name="Groups" />
@@ -163,8 +191,8 @@ const GroupsPage = () => {
               group={group}
               setGroup={setGroup}
               loading={loading}
-              groupLoading={groupLoading}
-              groupsData={groupsData}
+              // groupLoading={groupLoading}
+              // groupsData={groupsData}
               isUpdate={isUpdate}
               handleClose={handleClose}
             />
@@ -180,15 +208,17 @@ const GroupsPage = () => {
           title="Group"
         />
       )}
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <DataTable
-          columns={columns}
-          initialRows={groups?.data || []}
-          rowsPerPage={100}
-        />
-      )}
+
+      <DataTable
+        columns={columns}
+        initialRows={groups?.data || []}
+        loading={isLoading}
+        rowsPerPage={limit}
+        rowCount={groups?.total || 25}
+        paginationMode="server"
+        onPageChange={setPage}
+        onPageSizeChange={setLimit}
+      />
     </div>
   );
 };
@@ -200,8 +230,7 @@ const CreateGroup = ({
   group,
   setGroup,
   loading,
-  groupLoading,
-  groupsData,
+
   isUpdate,
   handleClose,
 }) => {

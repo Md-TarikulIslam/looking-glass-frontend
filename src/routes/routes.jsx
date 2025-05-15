@@ -15,6 +15,7 @@ import ServerRAMPage from "../pages/Dashboard/ServerDetails/ServerRAMPage";
 import CronJobsPage from "../pages/Dashboard/System/Settings/CronJobsPage";
 import PushoverPage from "../pages/Dashboard/System/Settings/PushoverPage";
 import TwitterPage from "../pages/Dashboard/System/Settings/TwitterPage";
+import ContactsPage from "../pages/Dashboard/Alerting/ContactsPage";
 
 // Lazy load components all
 const DashboardPage = lazy(() => import("../pages/Dashboard/DashboardPage"));
@@ -30,6 +31,9 @@ const RolesPage = lazy(() => import("../pages/Dashboard/System/RolesPage"));
 const UsersPage = lazy(() => import("../pages/Dashboard/System/UsersPage"));
 const CreateRolePage = lazy(
   () => import("../pages/Dashboard/System/CreateRolePage")
+);
+const UpdateRolePage = lazy(
+  () => import("../pages/Dashboard/System/UpdateRolePage")
 );
 const MonitoringPage = lazy(
   () => import("../pages/Dashboard/System/Settings/MonitoringPage")
@@ -88,6 +92,10 @@ export const router = createBrowserRouter([
         element: withSuspense(ServersPage),
       },
       {
+        path: "/dashboard/alerting/contacts",
+        element: <ContactsPage />,
+      },
+      {
         path: "/dashboard/system/groups",
         element: withSuspense(GroupsPage),
       },
@@ -98,6 +106,10 @@ export const router = createBrowserRouter([
       {
         path: "/dashboard/system/roles/create-role",
         element: withSuspense(CreateRolePage),
+      },
+      {
+        path: "/dashboard/system/roles/update-role/:id",
+        element: withSuspense(UpdateRolePage),
       },
       {
         path: "/dashboard/system/users",

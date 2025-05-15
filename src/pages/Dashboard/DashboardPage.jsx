@@ -5,9 +5,31 @@ import DashboardBreadcrumbs from "../../components/UI/DashboardBreadcrumbs";
 import DataTable from "../../components/UI/DataTable";
 import Loading from "../../components/UI/Loading";
 import { useBrandsQuery } from "../../redux/features/brandApi";
+import {useState, useEffect} from "react";
+
 
 const DashboardPage = () => {
   const { data: brands, isLoading } = useBrandsQuery();
+  // const { data: configs, isLoading: configLoading } = useConfigsQuery({
+  //   fields: "tableRecords",
+  // });
+
+  // const [limit, setLimit] = useState(10);
+  // const [page, setPage] = useState(0);
+
+  // useEffect(() => {
+  //   if (configs?.data?.tableRecords) {
+  //     setLimit(Number(configs.data.tableRecords));
+  //   }
+  // }, [configs]);
+
+  // const { data: contacts, isLoading: contactsLoading } = useContactsQuery({
+  //   page: page + 1,
+  //   limit,
+  //   fields: "name,phone,email,status,groupId",
+  //   search: "",
+  // });
+
 
   const columns = [
     {

@@ -1,24 +1,43 @@
 import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  Typography,
+    Box,
+    Button,
+    Checkbox,
+    FormControlLabel,
+    Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import {
-  MdOutlineCheckBox,
-  MdOutlineIndeterminateCheckBox,
-  MdSave,
+    MdOutlineCheckBox,
+    MdOutlineIndeterminateCheckBox,
+    MdSave,
 } from "react-icons/md";
+import { useParams } from "react-router";
 import DashboardBreadcrumbs from "../../../components/UI/DashboardBreadcrumbs";
 import Input from "../../../components/UI/Input";
+import Loading from "../../../components/UI/Loading";
 import { TonalButton } from "../../../components/UI/PrimaryButton";
-import { useCreateRoleMutation } from "../../../redux/features/roleApi";
+import {
+    useGetRoleByIdQuery,
+    useUpdateRoleMutation,
+} from "../../../redux/features/roleApi";
 
-const CreateRolePage = () => {
+const UpdateRolePage = () => {
   const [loading, setLoading] = useState(false);
+  const { id } = useParams();
+  const { data: role, isLoading } = useGetRoleByIdQuery({
+    params: { fields: "name,permissions" },
+    id: id,
+  });
+
+  useEffect(() => {
+    if (role?.data) {
+      setFormData({
+        name: role?.data?.name,
+        permissions: role?.data?.permissions,
+      });
+    }
+  }, [role]);
   const [formData, setFormData] = useState({
     name: "",
     permissions: [],
@@ -43,36 +62,36 @@ const CreateRolePage = () => {
 
   const handleCheckAll = () => {
     const allPermissions = [];
-    const categories = ['servers', 'groups', 'users', 'roles'];
-    const actions = ['Add', 'Edit', 'Delete', 'View'];
-    
+    const categories = ["servers", "groups", "users", "roles"];
+    const actions = ["Add", "Edit", "Delete", "View"];
+
     // Add all category permissions
-    categories.forEach(category => {
-      actions.forEach(action => {
+    categories.forEach((category) => {
+      actions.forEach((action) => {
         allPermissions.push(`${category}:${action}`);
       });
     });
 
     // Add misc permissions
     const miscPermissions = [
-      'ManageSettings',
-      'ViewSystemLogs',
-      'ViewAlertLogs',
-      'ShowSystemMenu',
-      'Search'
+      "ManageSettings",
+      "ViewSystemLogs",
+      "ViewAlertLogs",
+      "ShowSystemMenu",
+      "Search",
     ];
-    miscPermissions.forEach(permission => {
+    miscPermissions.forEach((permission) => {
       allPermissions.push(`misc:${permission}`);
     });
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       permissions: allPermissions,
     }));
   };
 
   const handleUncheckAll = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       permissions: [],
     }));
@@ -93,12 +112,14 @@ const CreateRolePage = () => {
         {title}
       </Typography>
       <div className="flex flex-col">
-        {['Add', 'Edit', 'Delete', 'View'].map((permission) => (
+        {["Add", "Edit", "Delete", "View"].map((permission) => (
           <FormControlLabel
             key={`${category}-${permission}`}
             control={
               <Checkbox
-                checked={formData.permissions?.includes(`${category}:${permission}`)}
+                checked={formData.permissions?.includes(
+                  `${category}:${permission}`
+                )}
                 onChange={() => handlePermissionChange(category, permission)}
                 size="small"
               />
@@ -110,14 +131,17 @@ const CreateRolePage = () => {
     </Box>
   );
 
-  const [createRole] = useCreateRoleMutation();
+  const [updateRole] = useUpdateRoleMutation();
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await createRole(formData).unwrap();
+      const res = await updateRole({
+        id: id,
+        data: formData,
+      }).unwrap();
 
-      toast.success(res?.message || "Role created successfully!");
+      toast.success(res?.message || "Role updated successfully!");
       setFormData("");
     } catch (error) {
       toast.error(error?.data?.message || "Something went wrong!");
@@ -125,6 +149,9 @@ const CreateRolePage = () => {
     setLoading(false);
   };
 
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <Box sx={{ maxWidth: "xl", mx: "auto" }}>
       <DashboardBreadcrumbs name="Create New Role" />
@@ -142,25 +169,25 @@ const CreateRolePage = () => {
           {renderPermissionGroup(
             "Servers",
             "servers",
-            ['Add', 'Edit', 'Delete', 'View'],
+            ["Add", "Edit", "Delete", "View"],
             "error"
           )}
           {renderPermissionGroup(
             "Groups",
             "groups",
-            ['Add', 'Edit', 'Delete', 'View'],
+            ["Add", "Edit", "Delete", "View"],
             "info"
           )}
           {renderPermissionGroup(
             "Users",
             "users",
-            ['Add', 'Edit', 'Delete', 'View'],
+            ["Add", "Edit", "Delete", "View"],
             "success"
           )}
           {renderPermissionGroup(
             "Roles",
             "roles",
-            ['Add', 'Edit', 'Delete', 'View'],
+            ["Add", "Edit", "Delete", "View"],
             "secondary"
           )}
 
@@ -172,21 +199,29 @@ const CreateRolePage = () => {
                 Miscellaneous
               </Typography>
               <div className="grid lg:grid-cols-2 gap-2">
-                {['ManageSettings', 'ViewSystemLogs', 'ViewAlertLogs', 'ShowSystemMenu', 'Search'].map(
-                  (permission) => (
-                    <FormControlLabel
-                      key={permission}
-                      control={
-                        <Checkbox
-                          checked={formData.permissions?.includes(`misc:${permission}`)}
-                          onChange={() => handlePermissionChange("misc", permission)}
-                          size="small"
-                        />
-                      }
-                      label={permission.split(/(?=[A-Z])/).join(" ")}
-                    />
-                  )
-                )}
+                {[
+                  "ManageSettings",
+                  "ViewSystemLogs",
+                  "ViewAlertLogs",
+                  "ShowSystemMenu",
+                  "Search",
+                ].map((permission) => (
+                  <FormControlLabel
+                    key={permission}
+                    control={
+                      <Checkbox
+                        checked={formData.permissions?.includes(
+                          `misc:${permission}`
+                        )}
+                        onChange={() =>
+                          handlePermissionChange("misc", permission)
+                        }
+                        size="small"
+                      />
+                    }
+                    label={permission.split(/(?=[A-Z])/).join(" ")}
+                  />
+                ))}
               </div>
             </Box>
           </div>
@@ -227,7 +262,7 @@ const CreateRolePage = () => {
           <TonalButton
             disabled={loading}
             startIcon={<MdSave />}
-            name={loading ? "Creating..." : "Create Role"}
+            name={loading ? "Updating..." : "Update Role"}
             type="submit"
             sx={{
               py: 1.4,
@@ -239,4 +274,4 @@ const CreateRolePage = () => {
   );
 };
 
-export default CreateRolePage;
+export default UpdateRolePage;

@@ -11,16 +11,25 @@ const roleApi = baseApi.injectEndpoints({
       invalidatesTags: ["role"],
     }),
     roles: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "/roles",
         method: "GET",
+        params,
+      }),
+      providesTags: ["role"],
+    }),
+    getRoleById: builder.query({
+      query: ({ params, id }) => ({
+        url: `/roles/${id}`,
+        method: "GET",
+        params:params,
       }),
       providesTags: ["role"],
     }),
     updateRole: builder.mutation({
       query: ({ data, id }) => ({
         url: `/roles/${id}`,
-        method: "PATCH",
+        method: "PUT",
         body: data,
       }),
       invalidatesTags: ["role"],
@@ -40,4 +49,5 @@ export const {
   useRolesQuery,
   useUpdateRoleMutation,
   useDeleteRoleMutation,
+  useGetRoleByIdQuery,
 } = roleApi;

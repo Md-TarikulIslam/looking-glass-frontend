@@ -1,8 +1,11 @@
 import {
+  MdAddAlert,
+    MdContacts,
     MdDashboard,
     MdDiversity2,
     MdFiberSmartRecord,
     MdGroups3,
+    MdList,
     MdPerson,
     MdSettings,
     MdStorage,
@@ -20,6 +23,23 @@ export const NAVIGATION = [
     segment: "dashboard/servers",
     title: "Servers",
     iconComponent: MdStorage,
+  },
+  {
+    segment: "dashboard/alerting",
+    title: "Alerting",
+    iconComponent: MdAddAlert,
+    children: [
+      {
+        segment: "contacts",
+        title: "Contacts",
+        iconComponent: MdContacts,
+      },
+      {
+        segment: "log",
+        title: "Log",
+        iconComponent: MdList,
+      },
+    ],
   },
 
   {

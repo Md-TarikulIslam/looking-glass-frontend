@@ -16,6 +16,7 @@ import CronJobsPage from "../pages/Dashboard/System/Settings/CronJobsPage";
 import PushoverPage from "../pages/Dashboard/System/Settings/PushoverPage";
 import TwitterPage from "../pages/Dashboard/System/Settings/TwitterPage";
 import ContactsPage from "../pages/Dashboard/Alerting/ContactsPage";
+import AlertingLogsPage from "../pages/Dashboard/Alerting/AlertingLogsPage";
 
 // Lazy load components all
 const DashboardPage = lazy(() => import("../pages/Dashboard/DashboardPage"));
@@ -94,6 +95,10 @@ export const router = createBrowserRouter([
       {
         path: "/dashboard/alerting/contacts",
         element: <ContactsPage />,
+      },
+      {
+        path: "/dashboard/alerting/log",
+        element: <AlertingLogsPage />,
       },
       {
         path: "/dashboard/system/groups",

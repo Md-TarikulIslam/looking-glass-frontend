@@ -75,7 +75,6 @@ const ContactsPage = () => {
     }
   }, [selectedItem, isUpdate]);
 
-  console.log(selectedItem);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -152,8 +151,8 @@ const ContactsPage = () => {
         const row = params.row;
         return (
           <div className="flex gap-2">
-            {row.email && <span>{row.email}</span>}
-            {row.phone && <span>{row.phone}</span>}
+            {row.email && <span title={row?.email}>@</span>}
+            {row.phone && <span title={row?.phone}>📱</span>}
           </div>
         );
       },

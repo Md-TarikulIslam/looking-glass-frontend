@@ -43,7 +43,7 @@ const CreateRolePage = () => {
 
   const handleCheckAll = () => {
     const allPermissions = [];
-    const categories = ['servers', 'groups', 'users', 'roles'];
+    const categories = ['Servers', 'Groups', 'Users', 'Roles'];
     const actions = ['Add', 'Edit', 'Delete', 'View'];
     
     // Add all category permissions
@@ -55,14 +55,14 @@ const CreateRolePage = () => {
 
     // Add misc permissions
     const miscPermissions = [
-      'ManageSettings',
-      'ViewSystemLogs',
-      'ViewAlertLogs',
-      'ShowSystemMenu',
+      'Manage Settings',
+      'View System Logs',
+      'View Alert Logs',
+      'Show System Menu',
       'Search'
     ];
     miscPermissions.forEach(permission => {
-      allPermissions.push(`misc:${permission}`);
+      allPermissions.push(`Misc:${permission}`);
     });
 
     setFormData(prev => ({
@@ -141,25 +141,25 @@ const CreateRolePage = () => {
         <div className="grid lg:grid-cols-4 grid-cols-1 md:grid-cols-2 gap-4 mt-6">
           {renderPermissionGroup(
             "Servers",
-            "servers",
+            "Servers",
             ['Add', 'Edit', 'Delete', 'View'],
             "error"
           )}
           {renderPermissionGroup(
             "Groups",
-            "groups",
+            "Groups",
             ['Add', 'Edit', 'Delete', 'View'],
             "info"
           )}
           {renderPermissionGroup(
             "Users",
-            "users",
+            "Users",
             ['Add', 'Edit', 'Delete', 'View'],
             "success"
           )}
           {renderPermissionGroup(
             "Roles",
-            "roles",
+            "Roles",
             ['Add', 'Edit', 'Delete', 'View'],
             "secondary"
           )}
@@ -172,14 +172,14 @@ const CreateRolePage = () => {
                 Miscellaneous
               </Typography>
               <div className="grid lg:grid-cols-2 gap-2">
-                {['ManageSettings', 'ViewSystemLogs', 'ViewAlertLogs', 'ShowSystemMenu', 'Search'].map(
+                {['Manage Settings', 'View System Logs', 'View Alert Logs', 'Show System Menu', 'Search'].map(
                   (permission) => (
                     <FormControlLabel
                       key={permission}
                       control={
                         <Checkbox
-                          checked={formData.permissions?.includes(`misc:${permission}`)}
-                          onChange={() => handlePermissionChange("misc", permission)}
+                          checked={formData.permissions?.includes(`Misc:${permission}`)}
+                          onChange={() => handlePermissionChange("Misc", permission)}
                           size="small"
                         />
                       }

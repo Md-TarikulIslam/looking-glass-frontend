@@ -4,58 +4,79 @@ import {
   FormControlLabel,
   TextField,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { MdSave } from "react-icons/md";
 import Input from "../../../../components/UI/Input";
-import PrimaryButton, {
-  TonalButton,
-} from "../../../../components/UI/PrimaryButton";
+import Loading from "../../../../components/UI/Loading";
+import { TonalButton } from "../../../../components/UI/PrimaryButton";
+import {
+  useEmailConfigsQuery,
+  useUpdateEmailConfigMutation,
+} from "../../../../redux/features/emailConfigApi";
 
 const securityOptions = ["None", "SSL", "TLS"];
 
 const EmailPage = () => {
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState({
-    fromEmail: "noreply@sierrasolution.com",
-    fromName: "Sierra Support",
-    enableSMTP: true,
-    requiresAuth: false,
-    smtpHost: "smtp.zoho.com",
-    smtpPort: "465",
-    smtpUsername: "noreply@sierrasolution.com",
-    smtpPassword: "",
-    smtpSecurity: "SSL",
-    authDomain: "",
+  const { data: emailConfigs, isLoading } = useEmailConfigsQuery({
+    fields:
+      "fromAddress,fromName,smtpAuth,smtpEnable,smtpHost,smtpPort,smtpUsername,smtpPassword,smtpEncryption,smtpAuthDomain",
   });
+  const [updateEmailConfig] = useUpdateEmailConfigMutation();
+  const data = emailConfigs?.data;
+  const [settings, setSettings] = useState({});
+  useEffect(() => {
+    if (data) {
+      setSettings({
+        fromAddress: data.fromAddress || "",
+        fromName: data.fromName || "",
+        smtpEnable: Boolean(data.smtpEnable),
+        smtpAuth: Boolean(data.smtpAuth),
+        smtpHost: data.smtpHost || "",
+        smtpPort: data.smtpPort || "",
+        smtpUsername: data.smtpUsername || "",
+        smtpPassword: data.smtpPassword || "",
+        smtpEncryption: data.smtpEncryption?.toLowerCase() || "none",
+        smtpAuthDomain: data.smtpAuthDomain || "",
+      });
+    }
+  }, [data]);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // API call will be added later
-      toast.success("Email settings updated successfully!");
+      const response = await updateEmailConfig({
+        id: data?.id,
+        data: settings,
+      }).unwrap();
+      toast.success(response?.message || "Email config updated successfully!");
     } catch (error) {
       toast.error(error?.data?.message || "Something went wrong!");
     }
     setLoading(false);
   };
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <form className="space-y-6 w-full" onSubmit={handleFormSubmit}>
       <div className="grid md:grid-cols-2 gap-6">
         <Input
-          value={settings.fromEmail}
+          value={settings.fromAddress}
           onChange={(e) =>
             setSettings({
               ...settings,
-              fromEmail: e.target.value,
+              fromAddress: e.target.value,
             })
           }
-          name="fromEmail"
+          name="fromAddress"
           label="Email From Address"
           type="email"
           required
+          focused
         />
 
         <Input
@@ -69,17 +90,18 @@ const EmailPage = () => {
           name="fromName"
           label="Emails From Name"
           required
+          focused
         />
 
         <div className="flex flex-col gap-2">
           <FormControlLabel
             control={
               <Checkbox
-                checked={settings.enableSMTP}
+                checked={Boolean(settings.smtpEnable)}
                 onChange={(e) =>
                   setSettings({
                     ...settings,
-                    enableSMTP: e.target.checked,
+                    smtpEnable: e.target.checked,
                   })
                 }
               />
@@ -90,11 +112,11 @@ const EmailPage = () => {
           <FormControlLabel
             control={
               <Checkbox
-                checked={settings.requiresAuth}
+                checked={Boolean(settings.smtpAuth)}
                 onChange={(e) =>
                   setSettings({
                     ...settings,
-                    requiresAuth: e.target.checked,
+                    smtpAuth: e.target.checked,
                   })
                 }
               />
@@ -114,6 +136,7 @@ const EmailPage = () => {
           name="smtpHost"
           label="SMTP Host"
           required={settings.enableSMTP}
+          focused
         />
 
         <Input
@@ -128,6 +151,7 @@ const EmailPage = () => {
           label="SMTP Port"
           type="number"
           required={settings.enableSMTP}
+          focused
         />
 
         <Input
@@ -141,6 +165,7 @@ const EmailPage = () => {
           name="smtpUsername"
           label="SMTP Username"
           required={settings.enableSMTP && settings.requiresAuth}
+          focused
         />
 
         <Input
@@ -155,14 +180,15 @@ const EmailPage = () => {
           label="SMTP Password"
           type="password"
           required={settings.enableSMTP && settings.requiresAuth}
+          focused
         />
 
         <Autocomplete
-          value={settings.smtpSecurity}
+          value={settings.smtpEncryption || "none"}
           onChange={(event, newValue) =>
             setSettings({
               ...settings,
-              smtpSecurity: newValue,
+              smtpEncryption: newValue,
             })
           }
           options={securityOptions}
@@ -171,23 +197,28 @@ const EmailPage = () => {
               {...params}
               variant="filled"
               label="SMTP Security"
-              required={settings.enableSMTP}
+              required={settings.smtpEnable}
+              focused
             />
           )}
           disableClearable
+          isOptionEqualToValue={(option, value) =>
+            option.toLowerCase() === value.toLowerCase()
+          }
         />
 
         <Input
-          value={settings.authDomain}
+          value={settings.smtpAuthDomain}
           onChange={(e) =>
             setSettings({
               ...settings,
-              authDomain: e.target.value,
+              smtpAuthDomain: e.target.value,
             })
           }
-          name="authDomain"
+          name="smtpAuthDomain"
           label="SMTP Authentication Domain"
           helperText="Use in case of connecting to an Exchange server or similar server requiring NTLM authentication."
+          focused
         />
       </div>
 

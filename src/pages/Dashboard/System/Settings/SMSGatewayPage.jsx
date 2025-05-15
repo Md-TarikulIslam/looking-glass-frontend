@@ -1,11 +1,14 @@
 import { Autocomplete, TextField } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { MdSave } from "react-icons/md";
 import Input from "../../../../components/UI/Input";
+import { TonalButton } from "../../../../components/UI/PrimaryButton";
 import {
-  TonalButton,
-} from "../../../../components/UI/PrimaryButton";
+  useSmsConfigsQuery,
+  useUpdateSmsConfigMutation,
+} from "../../../../redux/features/smsConfigApi";
+import Loading from "../../../../components/UI/Loading";
 
 const smsProviders = [
   "Twilio",
@@ -17,25 +20,44 @@ const smsProviders = [
 
 const SMSGatewayPage = () => {
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState({
-    provider: "Twilio",
-    accountSid: "ACb3dc98f4864405ad590dd2152e182117",
-    authToken: "",
-    apiId: "",
-    fromNumber: "Sierra Looking Glass",
+  const { data: smsConfigs, isLoading } = useSmsConfigsQuery({
+    fields:
+      "provider,username,password,apiId,smsFrom,smtpPort,smtpUsername,smtpPassword,smtpEncryption,passwordDomain",
   });
+  const [updateSmsConfig] = useUpdateSmsConfigMutation();
+  const data = smsConfigs?.data;
+  const [settings, setSettings] = useState({});
+  useEffect(() => {
+    if (data) {
+      setSettings({
+        provider: data.provider, // Use the provider value directly from API
+        username: data.username || "",
+        apiId: data.apiId,
+        password: data.password,
+        smsFrom: data.smsFrom || "",
+      });
+    }
+  }, [data]);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // API call will be added later
-      toast.success("SMS Gateway settings updated successfully!");
+      const response = await updateSmsConfig({
+        id: data?.id,
+        data: settings,
+      }).unwrap();
+      toast.success(response?.message || "SMS config updated successfully!");
     } catch (error) {
       toast.error(error?.data?.message || "Something went wrong!");
     }
     setLoading(false);
   };
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  console.log(data);
 
   return (
     <form className="space-y-6 w-full" onSubmit={handleFormSubmit}>
@@ -55,36 +77,39 @@ const SMSGatewayPage = () => {
               variant="filled"
               label="SMS Provider"
               required
+              focused
             />
           )}
           disableClearable
         />
 
         <Input
-          value={settings.accountSid}
+          value={settings.username}
           onChange={(e) =>
             setSettings({
               ...settings,
-              accountSid: e.target.value,
+              username: e.target.value,
             })
           }
-          name="accountSid"
+          name="username"
           label="Username/Account SID"
           required
+          focused
         />
 
         <Input
-          value={settings.authToken}
+          value={settings.password}
           onChange={(e) =>
             setSettings({
               ...settings,
-              authToken: e.target.value,
+              password: e.target.value,
             })
           }
-          name="authToken"
+          name="password"
           label="Password/Auth Token/Access Key"
           type="password"
           required
+          focused
         />
 
         <Input
@@ -98,20 +123,22 @@ const SMSGatewayPage = () => {
           name="apiId"
           label="API ID"
           helperText="Only for Clickatell"
+          focused
         />
 
         <Input
-          value={settings.fromNumber}
+          value={settings.smsFrom}
           onChange={(e) =>
             setSettings({
               ...settings,
-              fromNumber: e.target.value,
+              smsFrom: e.target.value,
             })
           }
-          name="fromNumber"
+          name="smsFrom"
           label="From Name/Number/Originator"
           helperText="For SMS Global, Twilio, 1s2u and Messagebird"
           required
+          focused
         />
       </div>
 

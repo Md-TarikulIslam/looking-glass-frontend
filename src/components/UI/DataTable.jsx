@@ -4,7 +4,6 @@ import Box from "@mui/material/Box";
 import {
   DataGrid,
   GridToolbarContainer,
-  GridToolbarDensitySelector,
   GridToolbarQuickFilter,
 } from "@mui/x-data-grid";
 import jsPDF from "jspdf";
@@ -16,12 +15,20 @@ export default function DataTable({
   columns,
   initialRows,
   toolbar,
-  rowsPerPage = 10,
   loading,
+  rowsPerPage,
+  rowCount,
+  paginationMode = 'client',
+  onPageChange,
+  onPageSizeChange
 }) {
   const [rows, setRows] = React.useState(initialRows);
   const [searchText, setSearchText] = React.useState("");
   const [rowModesModel, setRowModesModel] = React.useState({});
+  const [paginationModel, setPaginationModel] = React.useState({
+    page: 0,
+    pageSize: rowsPerPage || 10
+  });
 
   React.useEffect(() => {
     setRows(initialRows);
@@ -222,60 +229,25 @@ export default function DataTable({
   };
 
   return (
-    <Box
-      sx={{
-        height: 500,
-        width: "100%",
-        borderRadius: "20px",
-        "& .actions": {
-          color: "text.secondary",
-        },
-        "& .textPrimary": {
-          color: "text.primary",
-        },
-      }}
-    >
+    <Box sx={{ width: '100%', height: 800 }}>
       <DataGrid
         rows={filteredRows}
         columns={columns}
-        editMode="row"
-        className="!rounded-lg"
-        rowModesModel={rowModesModel}
-        autoHeight
-        getRowId={getRowId}
-        // hideFooter={true}
-        // pagination={false}
-        disableColumnResize={true}
-        // autosizeOnMount
-        rowHeight={60}
-        columnHeaderHeight={60}
-        disableColumnMenu={true}
-        onRowModesModelChange={handleRowModesModelChange}
-        disableColumnFilter
-        disableColumnSelector
         loading={loading}
-        // components={{
-        //   Toolbar: toolbar || CustomToolbar,
-        // }}}
+        getRowId={getRowId}
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={handleRowModesModelChange}
         slots={{ toolbar: CustomToolbar }}
-        slotProps={{
-          toolbar: {
-            showQuickFilter: true,
-          },
-          loadingOverlay: {
-            variant: "linear-progress",
-            noRowsVariant: "linear-progress",
-          },
+        paginationModel={paginationModel}
+        onPaginationModelChange={(model) => {
+          setPaginationModel(model);
+          onPageChange?.(model.page);
+          onPageSizeChange?.(model.pageSize);
         }}
-        // hideFooterPagination
-        disableRowSelectionOnClick
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: rowsPerPage,
-            },
-          },
-        }}
+        paginationMode={paginationMode}
+        rowCount={rowCount}
+        pageSizeOptions={[10, 25, 50, 100]}
+        pagination
       />
     </Box>
   );

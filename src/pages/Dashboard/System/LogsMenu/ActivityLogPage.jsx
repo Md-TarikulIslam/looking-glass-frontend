@@ -1,11 +1,17 @@
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import { useEffect, useState } from "react";
 import DataTable from "../../../../components/UI/DataTable";
 import { useConfigsQuery } from "../../../../redux/features/configApi";
 import { useActivityLogsQuery } from "../../../../redux/features/logsApi";
 
+// Enable the plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
 const ActivityLogPage = () => {
   const { data: configs, isLoading: configLoading } = useConfigsQuery({
-    fields: "tableRecords",
+    fields: "tableRecords,timeZone,dateFormat",
   });
 
   const [limit, setLimit] = useState(0);
@@ -24,7 +30,6 @@ const ActivityLogPage = () => {
     search: "",
   });
 
-  console.log(activity);
 
   const columns = [
     {
@@ -56,7 +61,12 @@ const ActivityLogPage = () => {
       field: "createdAt",
       headerName: "Timestamp",
       width: 200,
-      // editable: true,
+      renderCell: (params) => {
+        const time = dayjs(params.row.createdAt)
+          .tz(configs?.data?.timeZone)
+          .format(`${configs?.data?.dateFormat} HH:mm:ss`);
+        return time;
+      },
     },
   ];
 
@@ -70,9 +80,9 @@ const ActivityLogPage = () => {
         initialRows={activity?.data || []}
         loading={isLoading}
         rowsPerPage={limit}
-        rowCount={activity?.total || 25} // Use total count from API
+        rowCount={activity?.total || 25} 
         paginationMode="server"
-        onPageChange={setPage} // Directly use setPage
+        onPageChange={setPage} 
         onPageSizeChange={setLimit}
       />
     </>

@@ -10,25 +10,28 @@ const logsApi = baseApi.injectEndpoints({
       }),
       providesTags: ["logs"],
     }),
-    
+
     emailLogs: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "/logs/email-logs",
         method: "GET",
+        params: params,
       }),
       providesTags: ["logs"],
     }),
     smsLogs: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "/logs/sms-logs",
         method: "GET",
+        params: params,
       }),
       providesTags: ["logs"],
     }),
     cronLogs: builder.query({
-      query: () => ({
+      query: (params) => ({
         url: "/logs/cron-logs",
         method: "GET",
+        params: params,
       }),
       providesTags: ["logs"],
     }),

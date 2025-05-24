@@ -8,9 +8,9 @@ import { Footer } from "../components/Shared/Footer";
 import { ProfileMenu } from "../components/Shared/ProfileMenu";
 import { TopBar } from "../components/Shared/TopBar";
 import { theme } from "../context/ThemeContext";
+import { useConfigsQuery } from "../redux/features/configApi";
 import PrivateRoute from "../routes/PrivateRoute";
 import { NAVIGATION } from "../static/menuLinks";
-import { useConfigsQuery } from "../redux/features/configApi";
 
 function useRouter() {
   const navigate = useNavigate();
@@ -96,6 +96,8 @@ export default function Layout() {
     return processNavigationItems(NAVIGATION);
   }, [NAVIGATION, processNavigationItems]);
 
+  console.log(sidebarMini);
+
   return (
     <PrivateRoute>
       <AppProvider
@@ -114,9 +116,7 @@ export default function Layout() {
           slots={{
             toolbarActions: TopBar,
             toolbarAccount: () => null,
-            sidebarFooter: (props) => (
-              <ProfileMenu {...props} mini={sidebarMini} theme={theme} />
-            ),
+            sidebarFooter: (props) => <ProfileMenu {...props} theme={theme} />,
           }}
         >
           <Container

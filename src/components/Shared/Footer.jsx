@@ -1,9 +1,9 @@
 import { Box, Typography } from "@mui/material";
 import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import { useEffect, useState } from "react";
 import { useConfigsQuery } from "../../redux/features/configApi";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
 
 // Enable the plugins
 dayjs.extend(utc);
@@ -32,16 +32,13 @@ export const Footer = () => {
       component="footer"
       sx={{
         p: 2.5,
-        backgroundColor: (theme) => theme.palette.background.paper,
+        // backgroundColor: (theme) => theme.palette.background.paper,
         borderTop: (theme) => `1px solid ${theme.palette.divider}`,
         position: "fixed",
         bottom: 0,
         right: 0,
-
-        transition: "all var(--Sidebar-transition-time)",
         zIndex: 1000,
-
-        width: { sm: "100%", md: "90%" },
+        width: { sm: "100%", md: "100%" },
       }}
     >
       <Typography

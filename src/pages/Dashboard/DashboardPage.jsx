@@ -71,7 +71,7 @@ const DashboardPage = () => {
           />
           <Item
             title="Contacts"
-            number={contactsLoading ? "0" : contacts?.data?.length}
+            number={contactsLoading ? "0" : contacts?.data?.length || 0}
             color={blue[500]}
             icon={<MdContactEmergency />}
           />
